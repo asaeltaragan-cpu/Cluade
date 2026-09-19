@@ -9,7 +9,8 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: process.env.WEB_ORIGIN ?? "http://localhost:5173",
+    // Comma-separated list of allowed origins (scheme + host, no path).
+    origin: (process.env.WEB_ORIGIN ?? "http://localhost:5173").split(",").map((s) => s.trim()),
   }),
 );
 
