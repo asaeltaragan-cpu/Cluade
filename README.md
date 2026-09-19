@@ -4,9 +4,9 @@ Sales target and performance management app for Alma Lasers Israel — replaces
 the recurring Excel analysis with a shared system for sales performance,
 customer follow-up, recommended targets, and management oversight.
 
-Hebrew UI, full RTL. See `/web/src/lib/analysis.ts` and
-`/web/src/lib/workbook-parse.ts` for the calculation engine and import
-parser, and `AGENTS.md` (if present) or the plan history for the full spec.
+Hebrew UI, full RTL. The full build specification is in [SPEC.md](SPEC.md).
+See `/web/src/lib/analysis.ts` and `/web/src/lib/workbook-parse.ts` for the
+calculation engine and import parser.
 
 ## Structure
 
