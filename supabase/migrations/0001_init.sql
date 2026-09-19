@@ -275,7 +275,8 @@ begin
       and f.agent = w.agent
       and f.entity_id = w.entity_id
       and f.product = w.product
-  );
+  )
+  where true;
 end;
 $$;
 
