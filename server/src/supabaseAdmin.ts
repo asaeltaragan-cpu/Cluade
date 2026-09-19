@@ -2,7 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 
 // Tolerate common paste mistakes: whitespace, trailing slash, or a /rest/v1 suffix.
 const url = process.env.SUPABASE_URL?.trim().replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+// Keys never contain whitespace; a pasted line break would otherwise break every request.
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.replace(/\s+/g, "");
 
 if (!url || !serviceKey) {
   throw new Error(

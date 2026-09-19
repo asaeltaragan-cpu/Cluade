@@ -21,7 +21,8 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 app.get("/health/db", async (_req, res) => {
   const { error } = await supabaseAdmin.from("profiles").select("id", { head: true, count: "exact" });
   const { error: authError } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1 });
-  res.json({ db: error ? `error: ${error.message}` : "ok", auth: authError ? `error: ${authError.message}` : "ok" });
+  // Never echo error text: it can contain fragments of the configured key.
+  res.json({ db: error ? "error" : "ok", auth: authError ? "error" : "ok" });
 });
 
 app.use("/api/admin", requireAuth, adminRouter);

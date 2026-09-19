@@ -13,9 +13,8 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
   const { data, error } = await supabaseAdmin.auth.getUser(token);
   if (error || !data.user) {
     // eslint-disable-next-line no-console
-    console.error("getUser failed:", error?.status, error?.message);
-    // A 401/403 caused by the server's own key (not the caller's token) is a config problem, not a bad login.
-    res.status(401).json({ error: `Unauthorized: invalid token${error?.message ? ` (${error.message})` : ""}` });
+    console.error("getUser failed:", error?.status);
+    res.status(401).json({ error: "Unauthorized: invalid token" });
     return;
   }
   req.userId = data.user.id;
