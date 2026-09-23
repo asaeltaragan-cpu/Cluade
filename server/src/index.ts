@@ -5,6 +5,8 @@ import { requireAuth } from "./auth.js";
 import { supabaseAdmin } from "./supabaseAdmin.js";
 import { adminRouter } from "./routes/admin.js";
 import { backupRouter } from "./routes/backup.js";
+import { airtableRouter } from "./routes/airtable.js";
+import { runAirtableSync } from "./sync.js";
 
 const app = express();
 app.use(express.json());
@@ -27,6 +29,7 @@ app.get("/health/db", async (_req, res) => {
 
 app.use("/api/admin", requireAuth, adminRouter);
 app.use("/api/backup", requireAuth, backupRouter);
+app.use("/api/airtable", requireAuth, airtableRouter);
 
 // Central error handler — never leak internals, but keep the message in Hebrew-friendly text.
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -40,3 +43,18 @@ app.listen(port, () => {
   // eslint-disable-next-line no-console
   console.log(`Sweet Automation admin API listening on http://localhost:${port}`);
 });
+
+const SYNC_INTERVAL_MS = 10 * 60 * 1000;
+if (process.env.AIRTABLE_TOKEN) {
+  setInterval(() => {
+    runAirtableSync()
+      .then((r) => {
+        // eslint-disable-next-line no-console
+        console.log("[airtable sync]", r.ok ? `ok, ${r.rowCount} rows` : `failed: ${r.error}`);
+      })
+      .catch((err) => console.error("[airtable sync] unexpected error", err));
+  }, SYNC_INTERVAL_MS);
+  console.log(`Airtable auto-sync enabled, every ${SYNC_INTERVAL_MS / 60000} minutes.`);
+} else {
+  console.log("AIRTABLE_TOKEN not set — auto-sync disabled; manual /api/airtable/sync still requires it.");
+}

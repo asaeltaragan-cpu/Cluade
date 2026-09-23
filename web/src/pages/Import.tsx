@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
+import { AirtableSync } from "@/components/sales/AirtableSync";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth";
@@ -140,6 +141,8 @@ export function ImportPage() {
             הקיימים נשארים פעילים עד שתאשר.
           </p>
         </div>
+
+        <AirtableSync />
 
         {!parsed ? (
           <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center">
