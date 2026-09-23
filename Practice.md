@@ -24,7 +24,7 @@ Live site: https://asaeltaragan-cpu.github.io/Cluade/
 | 12 | 2026-09-23 | `fa7aee7` | Add GitHub Actions cron trigger for Airtable sync (Render sleep workaround) |
 | 13 | 2026-09-23 | `6f491c6` | Fix Airtable sync card disappearing on any status-check error |
 | 14 | 2026-09-23 | `3b98714` | Align Airtable config handling with the Supabase tolerant-value pattern |
-| 15 | 2026-09-23 | *(pending)* | Remove Airtable sync entirely — Supabase is the only database |
+| 15 | 2026-09-23 | `982a302` | Remove Airtable sync entirely — Supabase is the only database |
 
 ## Details
 
@@ -107,7 +107,7 @@ Applied the same tolerant-value treatment already used for `SUPABASE_URL` / `SUP
 - `.github/workflows/airtable-sync.yml`: strips a trailing slash from the `AIRTABLE_SYNC_URL` variable.
 - New `GET /health/airtable` (public, no secrets in the response), mirroring `/health/db`'s `{config, api}` shape exactly — surfaced on the sync card so a missing token or a failed connection is visible without needing to check server logs.
 
-### 15. Remove Airtable sync — *(pending)* (2026-09-23)
+### 15. Remove Airtable sync — `982a302` (2026-09-23)
 The user decided against using Airtable as a data source: Supabase should be the only database, and the only thing anything syncs against. Removed everything added in entries 11–14:
 - Deleted `server/src/airtable.ts`, `server/src/sync.ts`, `server/src/routes/airtable.ts`, `web/src/components/sales/AirtableSync.tsx`, `.github/workflows/airtable-sync.yml`.
 - `server/src/index.ts`: removed the `/health/airtable` endpoint, the `/api/airtable/*` routes, and the 10-minute in-process scheduler.
