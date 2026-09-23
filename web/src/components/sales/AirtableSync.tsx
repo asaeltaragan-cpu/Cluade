@@ -33,6 +33,7 @@ export function AirtableSync() {
     refetchInterval: 15_000,
     retry: false,
   });
+  const syncButtonEnabled = !busy && !status.data?.running;
 
   async function syncNow() {
     setBusy(true);
@@ -52,9 +53,6 @@ export function AirtableSync() {
     }
   }
 
-  // The API itself is disabled when AIRTABLE_TOKEN isn't configured server-side.
-  if (status.isError) return null;
-
   const last = status.data?.last;
 
   return (
@@ -66,12 +64,17 @@ export function AirtableSync() {
             המערכת מסנכרנת אוטומטית מבסיס ה-Airtable כל 10 דקות. אפשר גם להריץ סנכרון מיידי.
           </p>
         </div>
-        <Button size="sm" onClick={() => void syncNow()} disabled={busy || status.data?.running}>
+        <Button size="sm" onClick={() => void syncNow()} disabled={!syncButtonEnabled}>
           {busy || status.data?.running ? "מסנכרן…" : "סנכרון עכשיו"}
         </Button>
       </div>
 
-      {last ? (
+      {status.isError ? (
+        <p className="mt-3 text-xs text-destructive">
+          לא ניתן לבדוק את סטטוס הסנכרון כרגע ({status.error instanceof Error ? status.error.message : "שגיאה לא ידועה"}).
+          אפשר עדיין ללחוץ "סנכרון עכשיו".
+        </p>
+      ) : last ? (
         <div className="mt-3 text-xs text-muted-foreground">
           <span className={last.ok ? "text-success" : "text-destructive"}>
             {last.ok ? "הצליח" : "נכשל"}
