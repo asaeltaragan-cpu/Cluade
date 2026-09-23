@@ -14,3 +14,13 @@ services:
         sync: false
       - key: WEB_ORIGIN
         value: https://asaeltaragan-cpu.github.io
+      - key: AIRTABLE_TOKEN
+        sync: false
+      - key: AIRTABLE_BASE_ID
+        value: appfu5RQfIfOJeT27
+      - key: AIRTABLE_CUSTOMERS_TABLE_ID
+        value: tblPPp6Op7OADlw2d
+      - key: AIRTABLE_SALES_TABLE_ID
+        value: tblv5NwxOib3zAUm3
+      - key: CRON_SECRET
+        sync: false

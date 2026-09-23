@@ -5,7 +5,7 @@ import { requireAuth } from "./auth.js";
 import { supabaseAdmin } from "./supabaseAdmin.js";
 import { adminRouter } from "./routes/admin.js";
 import { backupRouter } from "./routes/backup.js";
-import { airtableRouter } from "./routes/airtable.js";
+import { airtableRouter, cronSyncHandler } from "./routes/airtable.js";
 import { runAirtableSync } from "./sync.js";
 
 const app = express();
@@ -30,6 +30,8 @@ app.get("/health/db", async (_req, res) => {
 app.use("/api/admin", requireAuth, adminRouter);
 app.use("/api/backup", requireAuth, backupRouter);
 app.use("/api/airtable", requireAuth, airtableRouter);
+// No user JWT here (external scheduler) — gated by CRON_SECRET inside the handler instead.
+app.post("/api/airtable/cron-sync", cronSyncHandler);
 
 // Central error handler — never leak internals, but keep the message in Hebrew-friendly text.
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
