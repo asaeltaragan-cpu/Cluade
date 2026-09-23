@@ -20,6 +20,7 @@ Live site: https://asaeltaragan-cpu.github.io/Cluade/
 | 8 | 2026-09-19 | `946aa48` | Strip whitespace from service key; stop echoing errors |
 | 9 | 2026-09-19 | `967cbee` | Add SPEC.md and link it from README |
 | 10 | 2026-09-19 | `cad9915` | Fix `sync_work_item_flags` for Supabase safe-update guard |
+| 11 | 2026-09-23 | `14e7817` | Add Airtable sync (10-min auto-sync + manual sync button) and this log |
 
 ## Details
 
@@ -66,6 +67,18 @@ Added the English build specification (`SPEC.md`) and linked it from the README,
 
 ### 10. Fix `sync_work_item_flags` — `cad9915` (2026-09-19)
 Excel upload failed at its last step with "UPDATE requires a WHERE clause" (Supabase's safe-update guard). Added an explicit `where true` in `0001_init.sql` and a new migration, `0002_fix_sync_flags_where.sql`, applied to the live database via the Supabase SQL Editor.
+
+### 11. Airtable sync — `14e7817` (2026-09-23)
+Also includes `SPEC.md` (967cbee) and this file (not yet pushed at the time).
+
+- `server/src/airtable.ts`: reads the Airtable customers + sales tables and maps them into the same fact shape as a parsed Excel workbook.
+- `server/src/sync.ts`: lands the pulled rows as a normal import batch (create → chunked insert → atomic activate → work-item flag sync), so everything downstream treats it exactly like a manual upload. Deduplicates by agent + entity + product + month.
+- `server/src/routes/airtable.ts` (`/api/airtable/status`, `/api/airtable/sync`, manager-only): status polling and an on-demand trigger.
+- `server/src/index.ts`: runs the sync automatically every 10 minutes when `AIRTABLE_TOKEN` is set; otherwise the feature stays inert.
+- `web/src/components/sales/AirtableSync.tsx`: a card on the Import screen (managers only) showing last-sync status and a "סנכרון עכשיו" button.
+- `supabase/migrations/0003_allow_service_role_sync.sql`: `sync_work_item_flags` now also accepts calls made with the service-role key (the automated sync has no logged-in user), applied to the live database.
+
+**Known limitation:** the Render free tier puts the server to sleep after ~15 minutes idle, which also stops the in-process 10-minute timer; it resumes on the next incoming request. True unattended 10-minute cadence needs either a paid always-on plan or an external scheduler (e.g. a GitHub Actions cron) hitting `/api/airtable/sync`.
 
 ## Operational notes (not code changes)
 - Supabase project configured; migrations `0001` and `0002` applied.
