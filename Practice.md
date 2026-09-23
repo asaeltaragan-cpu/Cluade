@@ -21,6 +21,7 @@ Live site: https://asaeltaragan-cpu.github.io/Cluade/
 | 9 | 2026-09-19 | `967cbee` | Add SPEC.md and link it from README |
 | 10 | 2026-09-19 | `cad9915` | Fix `sync_work_item_flags` for Supabase safe-update guard |
 | 11 | 2026-09-23 | `14e7817` | Add Airtable sync (10-min auto-sync + manual sync button) and this log |
+| 12 | 2026-09-23 | `fa7aee7` | Add GitHub Actions cron trigger for Airtable sync (Render sleep workaround) |
 
 ## Details
 
@@ -78,7 +79,20 @@ Also includes `SPEC.md` (967cbee) and this file (not yet pushed at the time).
 - `web/src/components/sales/AirtableSync.tsx`: a card on the Import screen (managers only) showing last-sync status and a "סנכרון עכשיו" button.
 - `supabase/migrations/0003_allow_service_role_sync.sql`: `sync_work_item_flags` now also accepts calls made with the service-role key (the automated sync has no logged-in user), applied to the live database.
 
-**Known limitation:** the Render free tier puts the server to sleep after ~15 minutes idle, which also stops the in-process 10-minute timer; it resumes on the next incoming request. True unattended 10-minute cadence needs either a paid always-on plan or an external scheduler (e.g. a GitHub Actions cron) hitting `/api/airtable/sync`.
+**Known limitation:** the Render free tier puts the server to sleep after ~15 minutes idle, which also stops the in-process 10-minute timer; it resumes on the next incoming request. Addressed in the next entry.
+
+### 12. External cron trigger — `fa7aee7` (2026-09-23)
+- `server/src/routes/airtable.ts` (`cronSyncHandler`) and `server/src/index.ts`: new `POST /api/airtable/cron-sync`, gated by a shared secret header (`x-cron-secret` / `CRON_SECRET`) instead of a user login, since a scheduler has no logged-in user.
+- `.github/workflows/airtable-sync.yml`: calls that endpoint on a `*/10 * * * *` schedule (plus manual `workflow_dispatch`). This both wakes a sleeping Render instance and runs the sync.
+- `render.yaml`: declares the new Airtable + `CRON_SECRET` environment variables.
+
+**Still not a hard real-time guarantee:** GitHub does not promise exact timing for scheduled workflows — under low repository activity a run can slip by several minutes or occasionally be skipped. This is best-effort, not a substitute for a paid always-on host if exact 10-minute cadence is required.
+
+**Manual setup still required (not done by the assistant):**
+- Create a new Airtable Personal Access Token (the one pasted in chat during setup was treated as compromised and never used) scoped to the `Demo Sales Data` base only, and set it as `AIRTABLE_TOKEN` in Render.
+- Generate a random `CRON_SECRET` value; set it identically in Render's environment and as a GitHub Actions **secret** named `CRON_SECRET`.
+- Add a GitHub Actions **variable** named `AIRTABLE_SYNC_URL` = the Render service's base URL (e.g. `https://sweet-automation-api.onrender.com`, no trailing slash).
+- Apply `supabase/migrations/0003_allow_service_role_sync.sql` to the live database (needed for the *unattended* sync — the manual "סנכרון עכשיו" button already worked without it, since a logged-in manager satisfies the original check).
 
 ## Operational notes (not code changes)
 - Supabase project configured; migrations `0001` and `0002` applied.
