@@ -5,9 +5,6 @@ import { requireAuth } from "./auth.js";
 import { supabaseAdmin } from "./supabaseAdmin.js";
 import { adminRouter } from "./routes/admin.js";
 import { backupRouter } from "./routes/backup.js";
-import { airtableRouter, cronSyncHandler } from "./routes/airtable.js";
-import { runAirtableSync } from "./sync.js";
-import { loadAirtableConfig, pingAirtable } from "./airtable.js";
 
 const app = express();
 app.use(express.json());
@@ -28,31 +25,8 @@ app.get("/health/db", async (_req, res) => {
   res.json({ db: error ? "error" : "ok", auth: authError ? "error" : "ok" });
 });
 
-// Same shape/intent as /health/db, for the Airtable side of the sync.
-app.get("/health/airtable", async (_req, res) => {
-  let config: "ok" | "missing" = "ok";
-  try {
-    loadAirtableConfig();
-  } catch {
-    config = "missing";
-  }
-  let api: "ok" | "error" | "skipped" = "skipped";
-  if (config === "ok") {
-    try {
-      await pingAirtable(loadAirtableConfig());
-      api = "ok";
-    } catch {
-      api = "error";
-    }
-  }
-  res.json({ config, api });
-});
-
 app.use("/api/admin", requireAuth, adminRouter);
 app.use("/api/backup", requireAuth, backupRouter);
-app.use("/api/airtable", requireAuth, airtableRouter);
-// No user JWT here (external scheduler) — gated by CRON_SECRET inside the handler instead.
-app.post("/api/airtable/cron-sync", cronSyncHandler);
 
 // Central error handler — never leak internals, but keep the message in Hebrew-friendly text.
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -66,18 +40,3 @@ app.listen(port, () => {
   // eslint-disable-next-line no-console
   console.log(`Sweet Automation admin API listening on http://localhost:${port}`);
 });
-
-const SYNC_INTERVAL_MS = 10 * 60 * 1000;
-if (process.env.AIRTABLE_TOKEN) {
-  setInterval(() => {
-    runAirtableSync()
-      .then((r) => {
-        // eslint-disable-next-line no-console
-        console.log("[airtable sync]", r.ok ? `ok, ${r.rowCount} rows` : `failed: ${r.error}`);
-      })
-      .catch((err) => console.error("[airtable sync] unexpected error", err));
-  }, SYNC_INTERVAL_MS);
-  console.log(`Airtable auto-sync enabled, every ${SYNC_INTERVAL_MS / 60000} minutes.`);
-} else {
-  console.log("AIRTABLE_TOKEN not set — auto-sync disabled; manual /api/airtable/sync still requires it.");
-}
