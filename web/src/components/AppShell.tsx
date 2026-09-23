@@ -1,6 +1,8 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { LogOut, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAuth, ROLE_LABEL, type Me } from "@/lib/auth";
 
@@ -13,6 +15,43 @@ const NAV = [
   { to: "/admin", label: "ניהול משתמשים", roles: "admin" as const },
   { to: "/backup", label: "גיבוי", roles: "admin" as const },
 ];
+
+/** Re-fetches everything currently on screen straight from Supabase (bypassing cached staleness). */
+function RefreshButton() {
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+
+  async function refresh() {
+    setBusy(true);
+    try {
+      await qc.invalidateQueries();
+      setLastRefreshed(new Date());
+      toast.success("הנתונים עודכנו מהמסד");
+    } catch (err) {
+      toast.error("הרענון נכשל", { description: err instanceof Error ? err.message : undefined });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      {lastRefreshed ? (
+        <span className="text-xs text-muted-foreground">עודכן {lastRefreshed.toLocaleTimeString("he-IL")}</span>
+      ) : null}
+      <button
+        type="button"
+        onClick={() => void refresh()}
+        disabled={busy}
+        className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+      >
+        <RefreshCw className={cn("size-3.5", busy && "animate-spin")} />
+        סנכרון עכשיו
+      </button>
+    </div>
+  );
+}
 
 export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
   const { signOut } = useAuth();
@@ -56,7 +95,12 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
             </button>
           </div>
         </aside>
-        <main className="min-w-0 flex-1 overflow-x-auto p-6">{children}</main>
+        <div className="min-w-0 flex-1">
+          <div className="flex justify-end border-b border-border bg-card px-6 py-2">
+            <RefreshButton />
+          </div>
+          <main className="overflow-x-auto p-6">{children}</main>
+        </div>
       </div>
     </div>
   );

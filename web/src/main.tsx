@@ -7,8 +7,18 @@ import { AuthProvider } from "@/lib/auth";
 import { App } from "@/App";
 import "@/index.css";
 
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      // Automatic daily refresh from Supabase for any page left open; the
+      // "סנכרון עכשיו" button in AppShell triggers the same refetch on demand.
+      refetchInterval: ONE_DAY_MS,
+    },
+  },
 });
 
 createRoot(document.getElementById("root")!).render(
