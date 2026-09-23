@@ -7,6 +7,7 @@ import { adminRouter } from "./routes/admin.js";
 import { backupRouter } from "./routes/backup.js";
 import { airtableRouter, cronSyncHandler } from "./routes/airtable.js";
 import { runAirtableSync } from "./sync.js";
+import { loadAirtableConfig, pingAirtable } from "./airtable.js";
 
 const app = express();
 app.use(express.json());
@@ -25,6 +26,26 @@ app.get("/health/db", async (_req, res) => {
   const { error: authError } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1 });
   // Never echo error text: it can contain fragments of the configured key.
   res.json({ db: error ? "error" : "ok", auth: authError ? "error" : "ok" });
+});
+
+// Same shape/intent as /health/db, for the Airtable side of the sync.
+app.get("/health/airtable", async (_req, res) => {
+  let config: "ok" | "missing" = "ok";
+  try {
+    loadAirtableConfig();
+  } catch {
+    config = "missing";
+  }
+  let api: "ok" | "error" | "skipped" = "skipped";
+  if (config === "ok") {
+    try {
+      await pingAirtable(loadAirtableConfig());
+      api = "ok";
+    } catch {
+      api = "error";
+    }
+  }
+  res.json({ config, api });
 });
 
 app.use("/api/admin", requireAuth, adminRouter);

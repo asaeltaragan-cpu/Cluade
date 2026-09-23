@@ -16,6 +16,7 @@ type SyncResult = {
 };
 
 type Status = { running: boolean; last: SyncResult | null };
+type Health = { config: "ok" | "missing"; api: "ok" | "error" | "skipped" };
 
 /**
  * Manual trigger + status for the automatic Airtable sync (server-side,
@@ -31,6 +32,13 @@ export function AirtableSync() {
     queryKey: ["airtable-status"],
     queryFn: () => api.get<Status>("/api/airtable/status"),
     refetchInterval: 15_000,
+    retry: false,
+  });
+  // Same public, no-secrets-leaked shape as the Supabase /health/db check.
+  const health = useQuery({
+    queryKey: ["airtable-health"],
+    queryFn: () => api.get<Health>("/health/airtable"),
+    refetchInterval: 30_000,
     retry: false,
   });
   const syncButtonEnabled = !busy && !status.data?.running;
@@ -68,6 +76,23 @@ export function AirtableSync() {
           {busy || status.data?.running ? "מסנכרן…" : "סנכרון עכשיו"}
         </Button>
       </div>
+
+      {health.data ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          הגדרה: <span className={health.data.config === "ok" ? "text-success" : "text-destructive"}>{health.data.config === "ok" ? "תקינה" : "חסרה"}</span>
+          {health.data.config === "ok" ? (
+            <>
+              {" "}
+              · חיבור ל-Airtable:{" "}
+              <span className={health.data.api === "ok" ? "text-success" : "text-destructive"}>
+                {health.data.api === "ok" ? "תקין" : "נכשל"}
+              </span>
+            </>
+          ) : (
+            " — הגדר AIRTABLE_TOKEN (וכתובות הבסיס/הטבלאות) בשרת"
+          )}
+        </p>
+      ) : null}
 
       {status.isError ? (
         <p className="mt-3 text-xs text-destructive">

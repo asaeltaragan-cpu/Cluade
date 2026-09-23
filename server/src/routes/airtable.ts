@@ -20,12 +20,16 @@ airtableRouter.post("/sync", requireManager, async (_req, res) => {
  * mounted directly in index.ts, not behind the router's normal auth.
  */
 export async function cronSyncHandler(req: Request, res: Response) {
-  const expected = process.env.CRON_SECRET;
+  // Same tolerant-secret handling as AIRTABLE_TOKEN / SUPABASE_SERVICE_ROLE_KEY:
+  // strip all whitespace, since a pasted line break would otherwise silently
+  // make every scheduled call fail with a generic 401.
+  const expected = process.env.CRON_SECRET?.replace(/\s+/g, "");
+  const provided = req.header("x-cron-secret")?.replace(/\s+/g, "");
   if (!expected) {
     res.status(503).json({ error: "CRON_SECRET not configured" });
     return;
   }
-  if (req.header("x-cron-secret") !== expected) {
+  if (provided !== expected) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }

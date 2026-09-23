@@ -5,8 +5,20 @@ type AirtableRecord = {
   fields: Record<string, unknown>;
 };
 
+// Same tolerant-parsing pattern as supabaseAdmin.ts: hosts/dashboards often
+// let a pasted value pick up leading/trailing whitespace or an internal line
+// break, and a raw mismatch then fails in a way that's hard to diagnose.
+
+/** For plain IDs (base/table): trim outer whitespace, keep internal content as-is. */
 function requireEnv(name: string): string {
   const v = process.env[name]?.trim();
+  if (!v) throw new Error(`Missing ${name}. Set it in the server environment to enable Airtable sync.`);
+  return v;
+}
+
+/** For secrets (the API token): strip ALL whitespace, since a pasted line break silently breaks every request. */
+function requireSecretEnv(name: string): string {
+  const v = process.env[name]?.replace(/\s+/g, "");
   if (!v) throw new Error(`Missing ${name}. Set it in the server environment to enable Airtable sync.`);
   return v;
 }
@@ -38,9 +50,17 @@ export type AirtableConfig = {
   salesTableId: string;
 };
 
+/** Lightweight reachability check (1 record) — mirrors /health/db's shape, never leaks the token. */
+export async function pingAirtable(config: AirtableConfig): Promise<void> {
+  const url = new URL(`${API_BASE}/${config.baseId}/${config.customersTableId}`);
+  url.searchParams.set("pageSize", "1");
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${config.token}` } });
+  if (!res.ok) throw new Error(`Airtable ping failed (${res.status})`);
+}
+
 export function loadAirtableConfig(): AirtableConfig {
   return {
-    token: requireEnv("AIRTABLE_TOKEN"),
+    token: requireSecretEnv("AIRTABLE_TOKEN"),
     baseId: requireEnv("AIRTABLE_BASE_ID"),
     customersTableId: requireEnv("AIRTABLE_CUSTOMERS_TABLE_ID"),
     salesTableId: requireEnv("AIRTABLE_SALES_TABLE_ID"),

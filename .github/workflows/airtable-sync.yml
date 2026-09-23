@@ -16,8 +16,12 @@ jobs:
       - name: Call the sync endpoint
         run: |
           set -e
+          # Same tolerant-URL handling as the server's SUPABASE_URL: a trailing
+          # slash pasted into the repo variable shouldn't break the request.
+          base="${{ vars.AIRTABLE_SYNC_URL }}"
+          base="${base%/}"
           code=$(curl -s -o /tmp/body.json -w '%{http_code}' -X POST \
-            "${{ vars.AIRTABLE_SYNC_URL }}/api/airtable/cron-sync" \
+            "$base/api/airtable/cron-sync" \
             -H "x-cron-secret: ${{ secrets.CRON_SECRET }}")
           echo "HTTP $code"
           cat /tmp/body.json
