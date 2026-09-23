@@ -25,6 +25,7 @@ Live site: https://asaeltaragan-cpu.github.io/Cluade/
 | 13 | 2026-09-23 | `6f491c6` | Fix Airtable sync card disappearing on any status-check error |
 | 14 | 2026-09-23 | `3b98714` | Align Airtable config handling with the Supabase tolerant-value pattern |
 | 15 | 2026-09-23 | `982a302` | Remove Airtable sync entirely — Supabase is the only database |
+| 16 | 2026-09-23 | `72e1da1` | Add "סנכרון עכשיו" refresh button and daily auto-refresh (Supabase only) |
 
 ## Details
 
@@ -116,6 +117,12 @@ The user decided against using Airtable as a data source: Supabase should be the
 - `supabase/migrations/0004_revert_service_role_sync.sql`: reverted `sync_work_item_flags` to manager-only (it was widened in 0003 solely so the unattended Airtable sync could call it).
 
 Net effect: the app is back to exactly what entries 1–10 describe — Supabase + Excel import, nothing else. The Airtable base itself (`Demo Sales Data`) was left untouched; nothing in this project reads from it anymore.
+
+### 16. Data-refresh button and daily auto-refresh — `72e1da1` (2026-09-23)
+After removing Airtable, the user asked for a "sync now" button for end users plus an automatic daily sync — clarified to mean: refreshing what's already in Supabase (there's no external source left to sync from), not a new data source.
+
+- `web/src/components/AppShell.tsx`: a "סנכרון עכשיו" button in a top bar shown on every authenticated page, visible to **every** logged-in user (agents included, not just managers) — unlike the removed Airtable card, which was manager-only. Calls `queryClient.invalidateQueries()` to force-refetch straight from Supabase, and shows a "last refreshed" time.
+- `web/src/main.tsx`: added a global `refetchInterval: 24h` to React Query's defaults, so a page left open for a full day refreshes itself automatically.
 
 ## Operational notes (not code changes)
 - Supabase project configured; migrations `0001` and `0002` applied.
