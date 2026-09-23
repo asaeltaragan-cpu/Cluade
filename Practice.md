@@ -22,6 +22,8 @@ Live site: https://asaeltaragan-cpu.github.io/Cluade/
 | 10 | 2026-09-19 | `cad9915` | Fix `sync_work_item_flags` for Supabase safe-update guard |
 | 11 | 2026-09-23 | `14e7817` | Add Airtable sync (10-min auto-sync + manual sync button) and this log |
 | 12 | 2026-09-23 | `fa7aee7` | Add GitHub Actions cron trigger for Airtable sync (Render sleep workaround) |
+| 13 | 2026-09-23 | `6f491c6` | Fix Airtable sync card disappearing on any status-check error |
+| 14 | 2026-09-23 | `3b98714` | Align Airtable config handling with the Supabase tolerant-value pattern |
 
 ## Details
 
@@ -93,6 +95,16 @@ Also includes `SPEC.md` (967cbee) and this file (not yet pushed at the time).
 - Generate a random `CRON_SECRET` value; set it identically in Render's environment and as a GitHub Actions **secret** named `CRON_SECRET`.
 - Add a GitHub Actions **variable** named `AIRTABLE_SYNC_URL` = the Render service's base URL (e.g. `https://sweet-automation-api.onrender.com`, no trailing slash).
 - Apply `supabase/migrations/0003_allow_service_role_sync.sql` to the live database (needed for the *unattended* sync — the manual "סנכרון עכשיו" button already worked without it, since a logged-in manager satisfies the original check).
+
+### 13. Fix disappearing sync card — `6f491c6` (2026-09-23)
+`web/src/components/sales/AirtableSync.tsx` hid the entire card, button included, on any status-check error — which is exactly what made it look missing before `AIRTABLE_TOKEN` was configured. The card now always renders, showing the error inline instead.
+
+### 14. Align config handling with Supabase — `3b98714` (2026-09-23)
+Applied the same tolerant-value treatment already used for `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`:
+- `server/src/airtable.ts`: `AIRTABLE_TOKEN` has all whitespace stripped (a pasted line break silently breaks every request, as it did once for the Supabase key); base/table IDs are trimmed.
+- `server/src/routes/airtable.ts`: `CRON_SECRET` comparison strips whitespace on both sides.
+- `.github/workflows/airtable-sync.yml`: strips a trailing slash from the `AIRTABLE_SYNC_URL` variable.
+- New `GET /health/airtable` (public, no secrets in the response), mirroring `/health/db`'s `{config, api}` shape exactly — surfaced on the sync card so a missing token or a failed connection is visible without needing to check server logs.
 
 ## Operational notes (not code changes)
 - Supabase project configured; migrations `0001` and `0002` applied.
