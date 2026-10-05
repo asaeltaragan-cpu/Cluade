@@ -124,6 +124,13 @@ After removing Airtable, the user asked for a "sync now" button for end users pl
 - `web/src/components/AppShell.tsx`: a "סנכרון עכשיו" button in a top bar shown on every authenticated page, visible to **every** logged-in user (agents included, not just managers) — unlike the removed Airtable card, which was manager-only. Calls `queryClient.invalidateQueries()` to force-refetch straight from Supabase, and shows a "last refreshed" time.
 - `web/src/main.tsx`: added a global `refetchInterval: 24h` to React Query's defaults, so a page left open for a full day refreshes itself automatically.
 
+### 17. Backup restore from the admin UI (2026-10-05)
+The user attached a backup (JSON + XLSX) and asked to upload it through the admin UI; the Backup page only exported. Built restore.
+
+- `server/src/routes/backup.ts`: `POST /api/backup/restore/preview` (validates version, tables and row counts; returns file vs current counts) and `POST /api/backup/restore/apply` (requires `confirm: true`; deletes children first, inserts parents first in 1000-row batches). `sales_facts.id` is left to the sequence; user-FK columns are nulled for users missing from this project; `profiles`/`user_roles` are upserted only for existing users and never deleted.
+- `server/src/index.ts`: 60MB body limit for the restore routes only.
+- `web/src/pages/Backup.tsx`: file picker, preview table, typed confirmation dialog; downloads the current state before applying.
+
 ## Operational notes (not code changes)
 - Supabase project configured; migrations `0001` and `0002` applied.
 - First administrator account created; role verified.

@@ -7,6 +7,8 @@ import { adminRouter } from "./routes/admin.js";
 import { backupRouter } from "./routes/backup.js";
 
 const app = express();
+// Backup files are ~13MB; give only the restore routes a large body limit (must precede the default parser).
+app.use("/api/backup/restore", express.json({ limit: "60mb" }));
 app.use(express.json());
 app.use(
   cors({
