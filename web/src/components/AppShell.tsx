@@ -63,8 +63,7 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
       <div className="flex min-h-screen">
         <aside className="flex w-56 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
           <div className="px-5 py-5">
-            <p className="text-xs font-semibold tracking-wide text-sidebar-primary">ALMA LASERS ISRAEL</p>
-            <p className="mt-1 text-sm font-bold">Sweet Automation</p>
+            <p className="text-sm font-bold">Sweet Automation</p>
           </div>
           <nav className="flex-1 space-y-1 px-3">
             {items.map((item) => (
