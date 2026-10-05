@@ -131,6 +131,9 @@ The user attached a backup (JSON + XLSX) and asked to upload it through the admi
 - `server/src/index.ts`: 60MB body limit for the restore routes only.
 - `web/src/pages/Backup.tsx`: file picker, preview table, typed confirmation dialog; downloads the current state before applying.
 
+### 18. Remove "ALMA LASERS" branding from the UI (2026-10-05)
+Removed the "ALMA LASERS ISRAEL" label from the sidebar (`AppShell.tsx`) and login card (`Login.tsx`), and "אלמה לייזרס ישראל" from the page title (`web/index.html`).
+
 ## Operational notes (not code changes)
 - Supabase project configured; migrations `0001` and `0002` applied.
 - First administrator account created; role verified.
