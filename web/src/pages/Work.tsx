@@ -195,7 +195,7 @@ export function WorkPage() {
             <option value="month">מעקב החודש</option>
             <option value="quarter">מעקב הרבעון</option>
           </Select>
-          <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label="סטטוס" className="w-32">
+          <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label="סטטוס" className="w-full sm:w-32">
             <option value="all">כל הסטטוסים</option>
             <option value="overdue">באיחור</option>
             {STATUSES.map((s) => (
@@ -204,13 +204,13 @@ export function WorkPage() {
               </option>
             ))}
           </Select>
-          <Select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} aria-label="עדיפות" className="w-32">
+          <Select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} aria-label="עדיפות" className="w-full sm:w-32">
             <option value="all">כל העדיפויות</option>
             <option value="high">גבוהה (60+)</option>
             <option value="mid">בינונית (30-59)</option>
             <option value="low">נמוכה (עד 30)</option>
           </Select>
-          <Input placeholder="חיפוש לקוח…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-9 w-44 text-xs" />
+          <Input placeholder="חיפוש לקוח…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-9 w-full text-xs sm:w-44" />
           <span className="text-xs text-muted-foreground">{fmt(rows.length)} שורות</span>
         </FiltersBar>
 

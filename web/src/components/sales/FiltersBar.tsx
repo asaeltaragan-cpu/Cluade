@@ -83,7 +83,7 @@ export function FiltersBar({
           value={value.agent}
           onChange={(e) => set({ agent: e.target.value })}
           aria-label="סוכן"
-          className="w-40"
+          className="w-[calc(50%-0.25rem)] sm:w-40"
         >
           <option value={ALL}>כל הסוכנים</option>
           {agents.map((a) => (
@@ -94,7 +94,7 @@ export function FiltersBar({
         </Select>
       ) : null}
 
-      <Select value={value.product} onChange={(e) => set({ product: e.target.value })} aria-label="מוצר" className="w-40">
+      <Select value={value.product} onChange={(e) => set({ product: e.target.value })} aria-label="מוצר" className="w-[calc(50%-0.25rem)] sm:w-40">
         <option value={ALL}>כל המוצרים</option>
         {products.map((p) => (
           <option key={p} value={p}>
@@ -103,7 +103,7 @@ export function FiltersBar({
         ))}
       </Select>
 
-      <div className="flex items-center gap-1">
+      <div className="flex w-full flex-wrap items-center gap-1 sm:w-auto sm:flex-nowrap">
         <span className="text-xs text-muted-foreground">שנה</span>
         <Select value={value.year} onChange={(e) => set({ year: e.target.value })} aria-label="שנה" className="w-28">
           <option value={AUTO}>{years[0] ? `${years[0]} (אחרונה)` : "אחרונה"}</option>

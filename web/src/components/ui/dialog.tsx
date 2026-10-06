@@ -24,14 +24,14 @@ export function Dialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={() => onOpenChange(false)} />
-      <div className="relative z-10 w-full max-w-md">{children}</div>
+      <div className="relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl">{children}</div>
     </div>
   );
 }
 
 export function DialogContent({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <div className={cn("rounded-2xl border border-border bg-card p-6 shadow-lg", className)}>
+    <div className={cn("rounded-2xl border border-border bg-card p-4 shadow-lg sm:p-6", className)}>
       {children}
     </div>
   );

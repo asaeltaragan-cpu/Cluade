@@ -108,7 +108,7 @@ export function TargetsPage() {
     <AppShell me={me}>
       <div className="space-y-5">
         <div>
-          <h1 className="text-2xl font-bold">יעדים {derived?.period.year ?? ""}</h1>
+          <h1 className="text-xl font-bold sm:text-2xl">יעדים {derived?.period.year ?? ""}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             היעד המומלץ = כל היחידות שנמכרו ב-{derived?.period.prevYear ?? "שנת ההשוואה"} בתוספת 15%. המספרים כאן
             שנתיים מלאים ואינם מושפעים מסינון החודשים.

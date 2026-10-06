@@ -28,7 +28,7 @@ export function Popover({
       {open ? (
         <div
           className={cn(
-            "absolute z-40 mt-1 min-w-40 rounded-lg border border-border bg-card p-2 shadow-lg",
+            "absolute z-40 mt-1 min-w-40 max-w-[calc(100vw-2rem)] rounded-lg border border-border bg-card p-2 shadow-lg",
             className,
           )}
         >

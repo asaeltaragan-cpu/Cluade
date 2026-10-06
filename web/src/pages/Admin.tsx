@@ -127,7 +127,7 @@ function RolePicker({ roles, onToggle }: { roles: AppRole[]; onToggle: (role: Ap
 
 function AgentPicker({ value, onChange, agentNames }: { value: string; onChange: (v: string) => void; agentNames: string[] }) {
   return (
-    <Select value={value} onChange={(e) => onChange(e.target.value)} className="w-56">
+    <Select value={value} onChange={(e) => onChange(e.target.value)} className="w-full sm:w-56">
       <option value={NONE}>ללא שיוך</option>
       {agentNames.map((a) => (
         <option key={a} value={a}>
