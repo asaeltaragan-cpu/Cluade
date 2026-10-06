@@ -134,6 +134,9 @@ The user attached a backup (JSON + XLSX) and asked to upload it through the admi
 ### 18. Remove "ALMA LASERS" branding from the UI (2026-10-05)
 Removed the "ALMA LASERS ISRAEL" label from the sidebar (`AppShell.tsx`) and login card (`Login.tsx`), and "אלמה לייזרס ישראל" from the page title (`web/index.html`).
 
+### 19. Mobile responsive layout (2026-10-06)
+The fixed 224px sidebar made every page unusable on phones. `AppShell.tsx`: below `md` the sidebar becomes an off-canvas drawer (hamburger in a sticky top bar, backdrop, closes on navigation, body scroll locked while open). Also: tighter page padding on small screens, filter controls wrap two per row (`FiltersBar.tsx`, `Work.tsx`), full-width selects in `Admin.tsx`, scrollable dialogs (`dialog.tsx`), popovers capped to viewport width, smaller headings and login padding. Tables already used `overflow-x-auto`. Verified by typecheck and build only, not on a real device.
+
 ## Operational notes (not code changes)
 - Supabase project configured; migrations `0001` and `0002` applied.
 - First administrator account created; role verified.

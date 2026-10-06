@@ -132,7 +132,7 @@ function Body({ derived, isManager }: { derived: Derived; isManager: boolean }) 
   return (
     <div className="space-y-7">
       <div>
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-xl font-bold sm:text-2xl">
           דשבורד מכירות {period.year} · {label}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
